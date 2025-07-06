@@ -48,19 +48,21 @@ curl -X POST http://localhost:3001/api/scrape \
 1. Create a new Web Service on Render
 2. Connect your Git repository
 3. Set the following:
-   - **Build Command**: `npm install && npx puppeteer browsers install chrome`
+   - **Build Command**: `npm install`
    - **Start Command**: `npm start`
    - **Environment**: Node
 
 4. Add environment variables:
    - `OPENAI_API_KEY`: Your OpenAI API key
    - `NODE_ENV`: `production`
+   - `PUPPETEER_SKIP_CHROMIUM_DOWNLOAD`: `false`
 
 ## Environment Variables
 
 - `OPENAI_API_KEY` (required): Your OpenAI API key for content analysis
 - `ALLOWED_ORIGINS`: Comma-separated list of allowed CORS origins
 - `PORT`: Server port (default: 3001)
+- `PUPPETEER_SKIP_CHROMIUM_DOWNLOAD`: Set to "false" to ensure Chrome is downloaded
 
 ## API Endpoints
 
@@ -116,20 +118,20 @@ Response:
 If you encounter Chrome installation errors:
 
 1. **Check the build logs** for any installation errors
-2. **Verify the Chrome path** by checking the environment variable
-3. **Try the bundled Chrome** by removing the `executablePath` setting
+2. **Ensure PUPPETEER_SKIP_CHROMIUM_DOWNLOAD is set to "false"**
+3. **The service will automatically download Chrome on first run**
 
 ### Common Issues
 
-1. **"Could not find Chrome"**: The build process didn't install Chrome properly
+1. **"Could not find Chrome"**: Chrome is being downloaded automatically on first run
 2. **"Maximum redirects exceeded"**: Website has anti-bot protection
 3. **"Timeout"**: Website is slow or has heavy JavaScript
 
 ### Performance Optimization
 
 - The service uses headless Chrome with optimized flags
-- Images and JavaScript are disabled for faster scraping
 - Content is analyzed using GPT-4 for intelligent extraction
+- Memory and performance optimizations are included
 
 ## License
 

@@ -2,10 +2,10 @@ services:
   - type: web
     name: scraper-microservice
     env: node
-    buildCommand: npm install && npx puppeteer browsers install chrome
+    buildCommand: npm install
     startCommand: npm start
     envVars:
       - key: NODE_ENV
         value: production
-      - key: PUPPETEER_EXECUTABLE_PATH
-        value: /opt/render/project/src/node_modules/puppeteer/.local-chromium/linux-*/chrome-linux/chrome 
+      - key: PUPPETEER_SKIP_CHROMIUM_DOWNLOAD
+        value: "false" 

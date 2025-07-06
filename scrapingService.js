@@ -33,38 +33,45 @@ class WebScrapingService {
   }
 
   async scrapeWebsite(url) {
-    const chromePath = await this.getChromePath();
+    let browser;
     
-    const browser = await puppeteer.launch({
-      headless: true,
-      args: [
-        '--no-sandbox',
-        '--disable-setuid-sandbox',
-        '--disable-dev-shm-usage',
-        '--disable-accelerated-2d-canvas',
-        '--no-first-run',
-        '--no-zygote',
-        '--disable-gpu',
-        '--disable-web-security',
-        '--disable-features=VizDisplayCompositor',
-        '--single-process',
-        '--disable-extensions',
-        '--disable-plugins',
-        '--disable-images',
-        '--disable-javascript',
-        '--disable-background-timer-throttling',
-        '--disable-backgrounding-occluded-windows',
-        '--disable-renderer-backgrounding'
-      ],
-      executablePath: chromePath
-    });
-
     try {
+      console.log('Attempting to launch browser...');
+      
+      // First try with bundled Chrome
+      browser = await puppeteer.launch({
+        headless: true,
+        args: [
+          '--no-sandbox',
+          '--disable-setuid-sandbox',
+          '--disable-dev-shm-usage',
+          '--disable-accelerated-2d-canvas',
+          '--no-first-run',
+          '--no-zygote',
+          '--disable-gpu',
+          '--disable-web-security',
+          '--disable-features=VizDisplayCompositor',
+          '--single-process',
+          '--disable-extensions',
+          '--disable-plugins',
+          '--disable-background-timer-throttling',
+          '--disable-backgrounding-occluded-windows',
+          '--disable-renderer-backgrounding',
+          '--memory-pressure-off',
+          '--max_old_space_size=4096'
+        ]
+      });
+
+      console.log('Browser launched successfully');
+      
       const page = await browser.newPage();
       await page.setUserAgent('Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/91.0.4472.124 Safari/537.36');
       await page.setViewport({ width: 1920, height: 1080 });
+      
+      console.log('Navigating to:', url);
       await page.goto(url, { waitUntil: 'networkidle2', timeout: 30000 });
       await new Promise(resolve => setTimeout(resolve, 2000));
+      
       const html = await page.content();
       const title = await page.title();
       const $ = cheerio.load(html);
@@ -160,7 +167,10 @@ class WebScrapingService {
       };
 
     } catch (error) {
-      await browser.close();
+      if (browser) {
+        await browser.close();
+      }
+      console.error('Scraping error:', error);
       const errorMessage = error instanceof Error ? error.message : 'Unknown error occurred';
       throw new Error(`Failed to scrape website: ${errorMessage}`);
     }
