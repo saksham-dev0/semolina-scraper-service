@@ -1,0 +1,11 @@
+services:
+  - type: web
+    name: scraper-microservice
+    env: node
+    buildCommand: npm install && npx puppeteer browsers install chrome
+    startCommand: npm start
+    envVars:
+      - key: NODE_ENV
+        value: production
+      - key: PUPPETEER_EXECUTABLE_PATH
+        value: /opt/render/project/src/node_modules/puppeteer/.local-chromium/linux-*/chrome-linux/chrome 

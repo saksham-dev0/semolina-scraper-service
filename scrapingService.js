@@ -1,6 +1,8 @@
 const puppeteer = require('puppeteer');
 const cheerio = require('cheerio');
 const OpenAI = require('openai');
+const path = require('path');
+const fs = require('fs');
 
 class WebScrapingService {
   constructor() {
@@ -9,7 +11,30 @@ class WebScrapingService {
     });
   }
 
+  async getChromePath() {
+    // Try to find Chrome in common locations
+    const possiblePaths = [
+      process.env.PUPPETEER_EXECUTABLE_PATH,
+      '/usr/bin/google-chrome',
+      '/usr/bin/chromium-browser',
+      '/usr/bin/chromium',
+      '/opt/google/chrome/chrome',
+      '/usr/bin/google-chrome-stable'
+    ];
+
+    for (const chromePath of possiblePaths) {
+      if (chromePath && fs.existsSync(chromePath)) {
+        return chromePath;
+      }
+    }
+
+    // If no Chrome found, let Puppeteer use its bundled version
+    return undefined;
+  }
+
   async scrapeWebsite(url) {
+    const chromePath = await this.getChromePath();
+    
     const browser = await puppeteer.launch({
       headless: true,
       args: [
@@ -19,8 +44,19 @@ class WebScrapingService {
         '--disable-accelerated-2d-canvas',
         '--no-first-run',
         '--no-zygote',
-        '--disable-gpu'
-      ]
+        '--disable-gpu',
+        '--disable-web-security',
+        '--disable-features=VizDisplayCompositor',
+        '--single-process',
+        '--disable-extensions',
+        '--disable-plugins',
+        '--disable-images',
+        '--disable-javascript',
+        '--disable-background-timer-throttling',
+        '--disable-backgrounding-occluded-windows',
+        '--disable-renderer-backgrounding'
+      ],
+      executablePath: chromePath
     });
 
     try {
